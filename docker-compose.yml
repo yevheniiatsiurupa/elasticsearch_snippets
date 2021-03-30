@@ -1,0 +1,30 @@
+version: '3.7'
+services:
+
+  elastic:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.11.1
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - cluster.name=es-single-node-cluster
+      - discovery.type=single-node
+    networks:
+      - elastic-network
+
+  spring-app:
+    build: .
+    ports:
+      - "8080:8080"
+      - "6001:6001"
+    restart: always
+    depends_on:
+      - elastic
+    networks:
+      - elastic-network
+
+#bridge network allows docker container to communicate between each other in isolation from other containers
+#it is important to add it to spring app as well (as without this property spring app cannot connect to elastic)
+networks:
+  elastic-network:
+    driver: bridge
