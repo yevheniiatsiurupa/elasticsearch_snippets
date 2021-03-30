@@ -17,7 +17,7 @@ public class ElasticSearchConfig {
     public RestHighLevelClient client() {
         ClientConfiguration clientConfiguration
                 = ClientConfiguration.builder()
-                .connectedTo("elastic:9200")
+                .connectedTo("es01:9200")
                 .build();
 
         return RestClients.create(clientConfiguration).rest();

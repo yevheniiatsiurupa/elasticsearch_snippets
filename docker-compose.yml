@@ -1,14 +1,59 @@
 version: '3.7'
 services:
-
-  elastic:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.11.1
-    ports:
-      - "9200:9200"
-      - "9300:9300"
+  es01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.12.0
+    container_name: es01
     environment:
-      - cluster.name=es-single-node-cluster
-      - discovery.type=single-node
+      - node.name=es01
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=es02,es03
+      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./data01:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    networks:
+      - elastic-network
+  es02:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.12.0
+    container_name: es02
+    environment:
+      - node.name=es02
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=es01,es03
+      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./data02:/usr/share/elasticsearch/data
+    networks:
+      - elastic-network
+  es03:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.12.0
+    container_name: es03
+    environment:
+      - node.name=es03
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=es01,es02
+      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./data03:/usr/share/elasticsearch/data
     networks:
       - elastic-network
 
@@ -19,7 +64,9 @@ services:
       - "6001:6001"
     restart: always
     depends_on:
-      - elastic
+      - es01
+      - es02
+      - es03
     networks:
       - elastic-network
 
