@@ -1,5 +1,13 @@
 version: '3.7'
 services:
+  es-hq:
+    image: elastichq/elasticsearch-hq
+    ports:
+      - 5000:5000
+    environment:
+      - HQ_DEFAULT_URL=http://es01:9200
+    networks:
+      - elastic-network
   es01:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.12.0
     container_name: es01
